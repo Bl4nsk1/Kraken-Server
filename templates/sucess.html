@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>KRAKEN // Processing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #050807;
+            color: #d7ffe8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(
+                    rgba(0, 255, 140, 0.025) 1px,
+                    transparent 1px
+                );
+            background-size: 100% 4px;
+            z-index: 999;
+        }
+
+        header {
+            height: 70px;
+            border-bottom: 1px solid #143a28;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .logo {
+            color: #00ff88;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 4px;
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            color: #648575;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        nav a:hover {
+            color: #00ff88;
+        }
+
+        .terminal-user {
+            color: #4b8065;
+            font-size: 12px;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: auto;
+            padding: 50px 40px;
+        }
+
+        .hero {
+            margin-bottom: 45px;
+        }
+
+        .eyebrow {
+            color: #00ff88;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(55px, 9vw, 130px);
+            line-height: 0.9;
+            letter-spacing: -5px;
+            color: #d7ffe8;
+        }
+
+        .subtitle {
+            margin-top: 25px;
+            color: #648575;
+            font-size: 14px;
+            max-width: 700px;
+            line-height: 1.8;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
+        }
+
+        .panel {
+            border: 1px solid #143a28;
+            background: #07100b;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #143a28;
+            color: #00ff88;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        .job-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            border: 1px solid #143a28;
+            padding: 15px;
+        }
+
+        .info-label {
+            color: #4b8065;
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            color: #00ff88;
+            font-size: 13px;
+        }
+
+        .files {
+            margin-bottom: 20px;
+        }
+
+        .file {
+            padding: 10px 0;
+            border-bottom: 1px solid #10281c;
+            color: #a5cdb4;
+            font-size: 12px;
+        }
+
+        .file::before {
+            content: "> ";
+            color: #00ff88;
+        }
+
+        .terminal {
+            height: 480px;
+            overflow-y: auto;
+            background: #020503;
+            border: 1px solid #143a28;
+            padding: 20px;
+            color: #9dffbd;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .terminal-line {
+            margin: 0;
+        }
+
+        .terminal-system {
+            color: #00ff88;
+        }
+
+        .terminal-error {
+            color: #ff5555;
+        }
+
+        .terminal-info {
+            color: #8fbca0;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #00ff88;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-item {
+            border: 1px solid #143a28;
+            padding: 15px;
+        }
+
+        .status-name {
+            font-size: 11px;
+            color: #648575;
+            margin-bottom: 7px;
+        }
+
+        .status-value {
+            font-size: 13px;
+            color: #00ff88;
+        }
+
+        .status-value.running {
+            animation: pulse 1.2s infinite;
+        }
+
+        .status-value.error {
+            color: #ff5555;
+        }
+
+        .status-value.done {
+            color: #00ff88;
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.35;
+            }
+        }
+
+        .progress {
+            height: 3px;
+            background: #10281c;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #00ff88;
+            transition: width 0.3s ease;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #00ff88;
+            text-decoration: none;
+            font-size: 11px;
+            border: 1px solid #143a28;
+            padding: 10px 15px;
+        }
+
+        .back:hover {
+            background: #0b2417;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                padding: 0 20px;
+            }
+
+            nav {
+                display: none;
+            }
+
+            main {
+                padding: 30px 20px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .job-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">KRAKEN</div>
+    <nav>
+        <a href="/">HOME</a>
+        <a href="/history" class="active">HISTORY</a>
+    </nav>
+    <div class="terminal-user">root@kraken:~#</div>
+</header>
+<main>
+    <section class="hero">
+        <div class="eyebrow">CAPTURE / ANALYZE / PROCESS</div>
+        <h1>KRAKEN</h1>
+        <div class="subtitle">CRACKING INICIADO!</div>
+    </section>
+    <section class="dashboard">
+        <div class="panel">
+            <div class="panel-header">◈ LIVE PROCESSING TERMINAL</div>
+            <div class="panel-body">
+                <div class="job-info">
+                    <div class="info-box">
+                        <div class="info-label">JOB ID</div>
+                        <div class="info-value" id="job-id">{{ job_id }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">STATUS</div>
+                        <div class="info-value" id="global-status">QUEUED</div>
+                    </div>
+                </div>
+                <div class="files">
+                    <div class="info-label">CAPTURES</div>{% for filename in filenames %}
+                    <div class="file">{{ filename }}</div>{% endfor %}</div>
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line terminal-system">[SYSTEM] Kraken processing server initialized.</div>
+                    <div class="terminal-line terminal-system">[OK] Upload received.</div>
+                    <div class="terminal-line terminal-info">[INFO] Waiting for processing engine...</div>
+                    <span class="cursor"></span>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">◈ ENGINE STATUS</div>
+            <div class="panel-body">
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-name">CAP2HASH</div>
+                        <div class="status-value" id="cap2hash-status">QUEUED</div>
+                        <div class="progress">
+                            <div class="progress-bar" id="cap2hash-progress"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-name">HASHCAT</div>
+                        <div class="status-value" id="hashcat-status">WAITING</div>
+                        <div class="progress">
+                            <div class="progress-bar" id="hashcat-progress"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-name">KRAKEN NODE</div>
+                        <div class="status-value">ONLINE</div>
+                    </div>
+                </div>
+                <a href="/" class="back">← NEW PROCCESS</a>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    const jobId = "{{ job_id }}";
+    const terminal = document.getElementById("terminal");
+    const globalStatus =
+        document.getElementById("global-status");
+    const cap2hashStatus =
+        document.getElementById("cap2hash-status");
+    const hashcatStatus =
+        document.getElementById("hashcat-status");
+    const cap2hashProgress =
+        document.getElementById("cap2hash-progress");
+    const hashcatProgress =
+        document.getElementById("hashcat-progress");
+    function addTerminal(message, type = "info") {
+        const cursor =
+            terminal.querySelector(".cursor");
+        if (cursor) {
+            cursor.remove();
+        }
+        const line =
+            document.createElement("div");
+        line.className =
+            "terminal-line terminal-" + type;
+        line.textContent = message;
+        terminal.appendChild(line);
+        terminal.appendChild(
+            document.createElement("span")
+        );
+        const newCursor =
+            document.createElement("span");
+        newCursor.className = "cursor";
+        terminal.appendChild(newCursor);
+        terminal.scrollTop =
+            terminal.scrollHeight;
+    }
+
+    function setStatus(element, status) {
+        element.textContent =
+            status.toUpperCase();
+        element.classList.remove(
+            "running",
+            "error",
+            "done"
+        );
+        if (
+            status === "running" ||
+            status === "processing"
+        ) {
+            element.classList.add("running");
+        }
+
+        if (
+            status === "error" ||
+            status === "failed"
+        ) {
+            element.classList.add("error");
+        }
+
+        if (
+            status === "done" ||
+            status === "completed"
+        ) {
+            element.classList.add("done");
+        }
+    }
+
+    const source =
+        new EventSource(
+            `/stream/${jobId}`
+        );
+
+    source.onmessage = function(event) {
+        const data =
+            JSON.parse(event.data);
+        if (data.message) {
+            let type = "info";
+            if (
+                data.status === "error" ||
+                data.status === "failed"
+            ) {
+                type = "error";
+            }
+            if (
+                data.status === "done" ||
+                data.status === "completed"
+            ) {
+                type = "system";
+            }
+            addTerminal(
+                data.message,
+                type
+            );
+        }
+        if (data.stage === "cap2hash") {
+            setStatus(
+                cap2hashStatus,
+                data.status
+            );
+            if (
+                data.status === "running" ||
+                data.status === "processing"
+            ) {
+                cap2hashProgress.style.width =
+                    "50%";
+            }
+            if (
+                data.status === "done" ||
+                data.status === "completed"
+            ) {
+                cap2hashProgress.style.width =
+                    "100%";
+            }
+            if (
+                data.status === "failed" ||
+                data.status === "error"
+            ) {
+                cap2hashProgress.style.width =
+                    "100%";
+            }
+        }
+        if (data.stage === "hashcat") {
+
+            setStatus(
+                hashcatStatus,
+                data.status
+            );
+            if (
+                data.status === "running" ||
+                data.status === "processing"
+            ) {
+                hashcatProgress.style.width =
+                    "50%";
+            }
+            if (
+                data.status === "done" ||
+                data.status === "completed"
+            ) {
+                hashcatProgress.style.width =
+                    "100%";
+            }
+            if (
+                data.status === "failed" ||
+                data.status === "error"
+            ) {
+                hashcatProgress.style.width =
+                    "100%";
+            }
+        }
+        if (data.status) {
+
+            globalStatus.textContent =
+                data.status.toUpperCase();
+
+        }
+
+    };
+
+    source.addEventListener(
+        "done",
+        function(event) {
+            const data =
+                JSON.parse(event.data);
+            globalStatus.textContent =
+                data.status
+                    ? data.status.toUpperCase()
+                    : "COMPLETED";
+            addTerminal(
+                "[SYSTEM] Processing finished.",
+                "system"
+            );
+            source.close();
+        }
+    );
+
+
+    source.onerror = function() {
+        console.warn(
+            "SSE connection interrupted."
+        );
+    };
+</script>
+</body>
+</html>

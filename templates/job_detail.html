@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRAKEN // Job Details</title>
+<style>
+:root{--bg:#050b0d;--panel:#091417;--border:#17343a;--cyan:#00e5ff;--green:#48ff9b;--text:#c9e5e8;--muted:#66878d;--red:#ff5e72;--yellow:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#0b2025 0,#050b0d 55%);color:var(--text);font-family:"JetBrains Mono","Consolas",monospace;min-height:100vh}
+header{height:76px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;gap:20px}.brand{font-size:22px;font-weight:800;letter-spacing:5px;color:var(--cyan)}a{color:var(--cyan);text-decoration:none}a:hover{color:var(--green)}main{width:min(1100px,92%);margin:45px auto}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--green)}h1{font-size:clamp(25px,4vw,42px);overflow-wrap:anywhere;margin:12px 0 28px}.panel{border:1px solid var(--border);background:rgba(7,18,21,.92);margin-bottom:22px}.panel-title{padding:16px 20px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:2px;color:var(--cyan)}.meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}.item{padding:18px 20px;border-bottom:1px solid #10272c;min-width:0}.label{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-bottom:8px}.value{font-size:12px;overflow-wrap:anywhere}.status{color:var(--green)}.failed{color:var(--red)}.files{line-height:1.8}.log{margin:0;padding:20px;max-height:65vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#020607;color:#b8d3d7;font-size:12px;line-height:1.65;min-height:200px}.actions{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:22px;font-size:12px}@media(max-width:650px){header{padding:0 4%}.meta{grid-template-columns:1fr 1fr}.item{padding:14px}.log{font-size:11px}}@media(max-width:420px){.meta{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="/">◉ KRAKEN</a><a href="/history">← JOB HISTORY</a></header>
+<main>
+  <div class="eyebrow">JOB / INSPECT / LOGS</div>
+  <h1>{{ job.id }}</h1>
+  <div class="actions"><a href="/history">← Return to history</a><a href="/status/{{ job.id }}" target="_blank" rel="noopener">OPEN JSON STATUS ↗</a></div>
+  <section class="panel">
+    <div class="panel-title">◈ JOB METADATA</div>
+    <div class="meta">
+      <div class="item"><div class="label">STATUS</div><div class="value status {% if job.status == 'failed' %}failed{% endif %}">{{ job.status|upper }}</div></div>
+      <div class="item"><div class="label">STEP</div><div class="value">{{ job.stage }}</div></div>
+      <div class="item"><div class="label">RETURN CODE</div><div class="value">{{ job.returncode if job.returncode is not none else '—' }}</div></div>
+      <div class="item"><div class="label">START</div><div class="value">{{ job.created_at }}</div></div>
+      <div class="item"><div class="label">UPDATE</div><div class="value">{{ job.updated_at }}</div></div>
+      <div class="item"><div class="label">FINISHED</div><div class="value">{{ job.finished_at or 'Running / not registered' }}</div></div>
+      <div class="item" style="grid-column:1/-1"><div class="label">FILES</div><div class="value files">{{ job.files|join('\n') }}</div></div>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-title">▣ COMPLETE LOG OF JOB</div>
+    <pre class="log" id="job-log">{{ log_text }}</pre>
+  </section>
+</main>
+<script>
+const log = document.getElementById('job-log');
+log.scrollTop = log.scrollHeight;
+</script>
+</body>
+</html>

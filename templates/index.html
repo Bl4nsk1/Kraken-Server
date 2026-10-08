@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRAKEN // Handshake Server</title>
+    <style>
+        @import url(
+            'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap'
+        );
+        :root {
+            --bg: #02070a;
+            --panel: rgba(3, 14, 19, 0.94);
+            --cyan: #00eaff;
+            --cyan-dark: #008fa3;
+            --text: #d5faff;
+            --muted: #63828a;
+            --green: #00ff9d;
+            --border:
+                rgba(0, 234, 255, 0.22);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(
+                    circle at 75% 25%,
+                    rgba(0, 145, 170, 0.12),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 20% 80%,
+                    rgba(0, 234, 255, 0.06),
+                    transparent 30%
+                ),
+                #02070a;
+            color: var(--text);
+            font-family:
+                "JetBrains Mono",
+                monospace;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .15;
+            background-image:
+                linear-gradient(
+                    rgba(0, 234, 255, .035) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(0, 234, 255, .035) 1px,
+                    transparent 1px
+                );
+            background-size: 45px 45px;
+        }
+
+        header {
+            height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4%;
+            border-bottom:
+                1px solid var(--border);
+            background:
+                rgba(1, 7, 10, .92);
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border:
+                1px solid var(--cyan);
+            color: var(--cyan);
+            font-size: 22px;
+            box-shadow:
+                0 0 18px
+                rgba(0, 234, 255, .2);
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: 9px;
+        }
+
+        nav {
+            display: flex;
+            gap: 38px;
+            height: 100%;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            transition: .2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+
+            color: var(--cyan);
+        }
+
+        .terminal-user {
+            color: var(--cyan);
+            font-size: 11px;
+        }
+
+        main {
+            width: min(1400px, 92%);
+            margin: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            padding:
+                70px 0
+                40px;
+        }
+
+        .breadcrumb {
+            color: var(--cyan);
+            font-size: 12px;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb span {
+            color: var(--muted);
+            margin:
+                0 13px;
+        }
+
+        h1 {
+            font-size:
+                clamp(65px, 9vw, 125px);
+            line-height: .85;
+            letter-spacing: 8px;
+            font-weight: 700;
+            color: #e8fcff;
+            text-shadow:
+                0 0 8px
+                rgba(0, 234, 255, .4),
+                0 0 35px
+                rgba(0, 234, 255, .12);
+        }
+
+        .tagline {
+            margin-top: 28px;
+            max-width: 650px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #8eb5bd;
+        }
+
+        .tagline strong {
+            color: var(--cyan);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                330px;
+            gap: 28px;
+            padding-bottom: 70px;
+        }
+
+        .upload-panel,
+        .status-panel {
+            border:
+                1px solid var(--border);
+            background:
+                var(--panel);
+            box-shadow:
+                0 0 40px
+                rgba(0, 0, 0, .25);
+        }
+
+        .upload-panel {
+            padding: 32px;
+        }
+
+        form {
+            width: 100%;
+        }
+
+        .drop-zone {
+            min-height: 310px;
+            border:
+                1px dashed
+                rgba(0, 234, 255, .4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: .25s;
+        }
+
+        .drop-zone:hover {
+            border-color:
+                var(--cyan);
+            background:
+                rgba(0, 234, 255, .035);
+            box-shadow:
+                inset 0 0 30px
+                rgba(0, 234, 255, .04);
+        }
+
+        .upload-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border:
+                1px solid var(--cyan);
+            color: var(--cyan);
+            font-size: 30px;
+            margin-bottom: 25px;
+            box-shadow:
+                0 0 25px
+                rgba(0, 234, 255, .12);
+        }
+
+        .drop-zone h2 {
+            font-size: 15px;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .formats {
+            margin-top: 18px;
+            color: #43666d;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .file-input {
+
+            margin-top: 25px;
+            color: var(--muted);
+            font-family: inherit;
+            font-size: 11px;
+            max-width: 100%;
+        }
+
+        .file-input::file-selector-button {
+
+            padding:
+                11px 18px;
+            margin-right: 12px;
+            border:
+                1px solid var(--cyan);
+            background:
+                transparent;
+            color: var(--cyan);
+            font-family: inherit;
+            font-size: 10px;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .file-input::file-selector-button:hover {
+
+            background:
+                var(--cyan);
+            color:
+                #001014;
+        }
+
+        .selected-files {
+
+            display: none;
+            margin-top: 18px;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            border:
+                1px solid var(--border);
+            background:
+                rgba(0, 234, 255, .025);
+            text-align: left;
+            padding: 12px;
+        }
+
+        .selected-files.visible {
+
+            display: block;
+        }
+
+        .selected-title {
+
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .selected-file {
+
+            color: var(--cyan);
+            font-size: 10px;
+            padding: 5px 0;
+            border-bottom:
+                1px solid
+                rgba(0, 234, 255, .08);
+            word-break: break-all;
+        }
+
+        .selected-file:last-child {
+
+            border-bottom: none;
+        }
+
+        .actions {
+
+            margin-top: 20px;
+        }
+
+        .submit-button {
+
+            width: 100%;
+            height: 52px;
+            border:
+                1px solid var(--cyan);
+            background:
+                var(--cyan);
+            color:
+                #001014;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .submit-button:hover {
+
+            box-shadow:
+                0 0 30px
+                rgba(0, 234, 255, .35);
+        }
+
+        .submit-button:disabled {
+
+            opacity: .5;
+            cursor: wait;
+        }
+
+        .terminal {
+
+            margin-top: 28px;
+            border:
+                1px solid var(--border);
+            background:
+                #010508;
+        }
+
+        .terminal-header {
+
+            padding:
+                11px 15px;
+            border-bottom:
+                1px solid var(--border);
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .terminal-body {
+
+            padding: 18px;
+            min-height: 125px;
+            color: #5c9aa5;
+            font-size: 10px;
+            line-height: 1.9;
+        }
+
+        .cyan {
+
+            color: var(--cyan);
+        }
+
+        .green {
+
+            color: var(--green);
+        }
+
+        .status-panel {
+
+            padding: 25px;
+        }
+
+        .panel-title {
+
+            color: var(--cyan);
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding-bottom: 20px;
+            border-bottom:
+                1px solid var(--border);
+        }
+
+        .server-status {
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .status-dot {
+
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background:
+                var(--green);
+            box-shadow:
+                0 0 12px
+                var(--green);
+            animation:
+                pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .35;
+            }
+        }
+
+        .online {
+
+            color: var(--green);
+            font-size: 12px;
+        }
+
+        .stats {
+
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .stat {
+
+            display: flex;
+            justify-content:
+                space-between;
+            gap: 15px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .stat span:last-child {
+
+            color: var(--text);
+        }
+
+        .divider {
+
+            height: 1px;
+            background:
+                var(--border);
+            margin: 27px 0;
+        }
+
+        .section-title {
+
+            color: var(--cyan);
+            font-size: 11px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+        }
+
+        .algorithm {
+
+            color: var(--muted);
+            font-size: 10px;
+            margin: 12px 0;
+        }
+
+        .algorithm::before {
+
+            content: "> ";
+            color: var(--cyan);
+        }
+
+        footer {
+
+            border-top:
+                1px solid var(--border);
+            padding:
+                25px 4%;
+            display: flex;
+            justify-content:
+                space-between;
+            color: #35545a;
+            font-size: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        footer span:last-child {
+
+            color:
+                var(--cyan-dark);
+        }
+
+        @media (max-width: 900px) {
+
+            nav {
+                display: none;
+            }
+
+            .dashboard {
+
+                grid-template-columns: 1fr;
+            }
+
+            .status-panel {
+
+                order: -1;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            header {
+
+                padding:
+                    0 20px;
+            }
+
+            .terminal-user {
+
+                display: none;
+            }
+
+            main {
+
+                width: 94%;
+            }
+
+            .upload-panel {
+
+                padding: 18px;
+            }
+
+            h1 {
+
+                font-size: 55px;
+            }
+
+            .drop-zone {
+
+                min-height: 280px;
+            }
+
+            footer {
+
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+
+    <div class="brand">
+        <div class="logo">◉</div>
+        <div class="brand-name">KRAKEN</div>
+    </div>
+    <nav>
+        <a href="/" class="active">HOME</a>
+        <a href="/history" class="active">HISTORY</a>
+    </nav>
+    <div class="terminal-user">root@kraken:~#</div>
+</header>
+<main>
+    <section class="hero">
+        <div class="breadcrumb">CAPTURE<span>/</span>ANALYZE<span>/</span>PROCESS</div>
+        <h1>KRAKEN</h1>
+        <p class="tagline">HANDSHAKES ARE JUST ANOTHER<strong> CHALLENGE.</strong></p>
+    </section>
+    <section class="dashboard">
+        <div class="upload-panel">
+            <form action="/" method="POST" enctype="multipart/form-data" id="upload-form">
+                <div class="drop-zone" id="drop-zone">
+                    <div class="upload-icon">↑</div>
+                    <h2>INPUT HANDSHAKE</h2>
+                    <div class="formats">SUPPORTED: .PCAP / .CAP / .PCAPNG</div>
+                    <input class="file-input" type="file" name="file" id="file-input" accept=".pcap,.cap,.pcapng" multiple required>
+                    <div class="selected-files" id="selected-files">
+                        <div class="selected-title">CAPTURES SELECTED</div>
+                        <div id="file-list"></div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <input class="submit-button" id="submit-button" type="submit" value="ENVIAR PARA KRAKEN">
+                </div>
+            </form>
+            <div class="terminal">
+                <div class="terminal-header">KRAKEN // SYSTEM CONSOLE</div>
+                <div class="terminal-body" id="system-console">
+                    <div><span class="cyan">[SYSTEM]</span> Kraken handshake server initialized.</div>
+                    <div><span class="green">[OK]</span> Upload endpoint ready.
+                    </div>
+                    <div><span class="cyan">[INFO]</span> Waiting for capture...</div>
+                    <div><span class="cyan">root@kraken:~#</span> _</div>
+                </div>
+            </div>
+        </div>
+        <aside class="status-panel">
+            <div class="panel-title"> ◈ SERVER STATUS</div>
+            <div class="server-status">
+                <div class="status-dot"></div>
+                <span class="online">ONLINE</span>
+            </div>
+            <div class="divider"></div>
+            <div class="section-title">◉ CAPTURE FORMAT</div>
+            <div class="algorithm">PCAP</div>
+            <div class="algorithm">PCAPNG</div>
+            <div class="algorithm">CAP</div>
+            <div class="divider"></div>
+            <div class="section-title">▣ KRAKEN</div>
+            <div class="algorithm">VERSION 1.0.0</div>
+            <div class="algorithm">NODE: ONLINE</div>
+            <div class="algorithm">QUEUE: <span id="queue-status">READY</span></div>
+            <div class="divider"></div>
+            <div class="section-title">◉ ENGINE</div>
+            <div class="algorithm">CAP2HASH:<span id="cap2hash-status"> READY</span></div>
+            <div class="algorithm">HASHCAT:<span id="hashcat-status"> READY</span></div>
+        </aside>
+    </section>
+</main>
+<footer>
+    <span>KRAKEN / HANDSHAKE SERVER</span>
+    <span>&gt; system.ready_</span>
+</footer>
+<script>
+    const fileInput =
+        document.getElementById(
+            "file-input"
+        );
+    const fileList =
+        document.getElementById(
+            "file-list"
+        );
+    const selectedFiles =
+        document.getElementById(
+            "selected-files"
+        );
+    const form =
+        document.getElementById(
+            "upload-form"
+        );
+    const submitButton =
+        document.getElementById(
+            "submit-button"
+        );
+    const dropZone =
+        document.getElementById(
+            "drop-zone"
+        );
+    const consoleElement =
+        document.getElementById(
+            "system-console"
+        );
+    const queueStatus =
+        document.getElementById(
+            "queue-status"
+        );
+    const cap2hashStatus =
+        document.getElementById(
+            "cap2hash-status"
+        );
+    const hashcatStatus =
+        document.getElementById(
+            "hashcat-status"
+        );
+
+    fileInput.addEventListener(
+        "change",
+        function () {
+            fileList.innerHTML = "";
+            if (!this.files.length) {
+                selectedFiles.classList.remove(
+                    "visible"
+                );
+                return;
+            }
+            selectedFiles.classList.add(
+                "visible"
+            );
+            Array.from(this.files).forEach(
+                function (file) {
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+                    item.className =
+                        "selected-file";
+                    item.textContent =
+                        "> " + file.name;
+                    fileList.appendChild(
+                        item
+                    );
+                }
+            );
+            queueStatus.textContent =
+                this.files.length +
+                " FILE(S)";
+        }
+    );
+
+    dropZone.addEventListener(
+        "click",
+        function (event) {
+            if (
+                event.target !== fileInput &&
+                event.target.tagName !== "INPUT"
+            ) {
+                fileInput.click();
+            }
+        }
+    );
+
+    dropZone.addEventListener(
+        "dragover",
+        function (event) {
+
+            event.preventDefault();
+            dropZone.style.borderColor =
+                "var(--cyan)";
+
+        }
+    );
+
+    dropZone.addEventListener(
+        "dragleave",
+        function () {
+            dropZone.style.borderColor =
+                "";
+
+        }
+    );
+
+    dropZone.addEventListener(
+        "drop",
+        function (event) {
+            event.preventDefault();
+            dropZone.style.borderColor =
+                "";
+            if (!event.dataTransfer.files.length) {
+                return;
+            }
+            fileInput.files =
+                event.dataTransfer.files;
+            fileInput.dispatchEvent(
+                new Event("change")
+            );
+
+        }
+    );
+
+    form.addEventListener(
+        "submit",
+        function () {
+            submitButton.disabled =
+                true;
+            submitButton.value =
+                "SENDING TO KRAKEN...";
+            queueStatus.textContent =
+                "PROCESSING";
+            cap2hashStatus.textContent =
+                "QUEUED";
+            hashcatStatus.textContent =
+                "WAITING";
+            consoleElement.innerHTML = "";
+            addConsole(
+                "[SYSTEM] Uploading capture to Kraken...",
+                "cyan"
+            );
+            addConsole(
+                "[INFO] " +
+                fileInput.files.length +
+                " file(s) queued.",
+                "cyan"
+            );
+
+        }
+    );
+
+    function addConsole(
+        message,
+        type
+    ) {
+        const line =
+            document.createElement(
+                "div"
+            );
+        line.className =
+            type || "";
+        line.textContent =
+            message;
+        consoleElement.appendChild(
+            line
+        );
+    }
+</script>
+</body>
+</html>

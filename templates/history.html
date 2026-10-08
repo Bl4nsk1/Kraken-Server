@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRAKEN // Job History</title>
+<style>
+:root{--bg:#050b0d;--panel:#091417;--border:#17343a;--cyan:#00e5ff;--green:#48ff9b;--text:#c9e5e8;--muted:#66878d;--red:#ff5e72;--yellow:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#0b2025 0,#050b0d 55%);color:var(--text);font-family:"JetBrains Mono","Consolas",monospace;min-height:100vh}
+header{height:76px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;gap:20px}
+.brand{font-size:22px;font-weight:800;letter-spacing:5px;color:var(--cyan)}nav{display:flex;gap:24px}a{color:var(--cyan);text-decoration:none}a:hover{color:var(--green)}nav a{font-size:11px;letter-spacing:2px}
+main{width:min(1200px,92%);margin:48px auto}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--green)}h1{font-size:clamp(32px,5vw,52px);margin:12px 0;color:#e8fdff;letter-spacing:3px}.sub{color:var(--muted);font-size:13px;margin-bottom:30px}
+.panel{border:1px solid var(--border);background:rgba(7,18,21,.92);box-shadow:0 0 35px #001a1f55;overflow:hidden}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted)}
+input{background:#03090b;border:1px solid var(--border);padding:10px 12px;color:var(--text);font:inherit;min-width:220px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:780px}th,td{text-align:left;padding:15px 18px;border-bottom:1px solid #10272c;font-size:12px;vertical-align:top}th{color:var(--cyan);font-size:10px;letter-spacing:1.5px;font-weight:600}tbody tr:hover{background:#0b2025}td.files{max-width:260px;overflow-wrap:anywhere;color:#a4c3c8}.status{display:inline-block;padding:5px 8px;border:1px solid currentColor;font-size:10px;letter-spacing:1px}.completed{color:var(--green)}.failed{color:var(--red)}.running,.queued{color:var(--yellow)}.unknown{color:var(--muted)}.details{white-space:nowrap}.empty{padding:40px;text-align:center;color:var(--muted)}footer{margin-top:30px;color:#35545a;font-size:10px;display:flex;justify-content:space-between}
+@media(max-width:650px){header{padding:0 4%}nav{gap:12px}nav a{font-size:9px}main{margin:30px auto}.toolbar{align-items:stretch;flex-direction:column}input{width:100%;min-width:0}footer{gap:10px;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">◉ KRAKEN</a>
+  <nav>
+    <a href="/">HOME</a>
+    <a href="/history">JOB HISTORY</a>
+  </nav>
+  <span style="font-size:10px;color:var(--muted)">root@kraken:~#</span>
+</header>
+<main>
+  <div class="eyebrow">SYSTEM / PROCESSING / ARCHIVE</div>
+  <h1>JOB HISTORY</h1>
+  <div class="sub">History of jobs proccessed by KRAKEN.</div>
+  <section class="panel">
+    <div class="toolbar">
+      <span>REGISTROS: {{ jobs|length }} / últimos 500</span>
+      <input id="filter" type="search" placeholder="Filtrar por ID, arquivo ou status...">
+    </div>
+    {% if jobs %}
+    <div class="table-wrap">
+    <table id="jobs-table">
+      <thead><tr><th>JOB / FILES</th><th>STATUS</th><th>STEP</th><th>START</th><th>RETURN</th><th></th></tr></thead>
+      <tbody>
+      {% for job in jobs %}
+      <tr data-search="{{ (job.id ~ ' ' ~ (job.files|join(' ')) ~ ' ' ~ job.status ~ ' ' ~ job.stage)|lower }}">
+        <td><div style="color:var(--cyan);margin-bottom:8px">{{ job.id }}</div><div class="files">{{ job.files|join(', ') }}</div></td>
+        <td><span class="status {{ job.status if job.status in ['completed','failed','running','queued'] else 'unknown' }}">{{ job.status|upper }}</span></td>
+        <td>{{ job.stage }}</td>
+        <td>{{ job.created_at|replace('T',' ')|replace('+00:00',' UTC') }}</td>
+        <td>{{ job.returncode if job.returncode is not none else '—' }}</td>
+        <td class="details"><a href="/jobs/{{ job.id }}">VER LOG →</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty">No job yet.</div>
+    {% endif %}
+  </section>
+  <footer><span>KRAKEN / JOB ARCHIVE</span><span>persistent.storage = enabled_</span></footer>
+</main>
+<script>
+const filter = document.getElementById('filter');
+filter.addEventListener('input', () => {
+  const value = filter.value.toLowerCase().trim();
+  document.querySelectorAll('#jobs-table tbody tr').forEach(row => {
+    row.hidden = !row.dataset.search.includes(value);
+  });
+});
+</script>
+</body>
+</html>
