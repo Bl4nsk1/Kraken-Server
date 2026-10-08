@@ -293,6 +293,12 @@ Kraken-Server is intended for authorized security research, testing, and educati
 
 The project does not grant permission to access, audit, or recover credentials from third-party networks or devices.
 
-## License
+## 📜 License
 
-No license has been specified yet. Until a license is added to the repository, permission to redistribute or modify this project should not be assumed.
+MIT License
+
+Copyright (c) 2026 Bl4nsk1
+
+## 👤 Author
+
+[Bl4nsk1](https://github.com/Bl4nsk1)
