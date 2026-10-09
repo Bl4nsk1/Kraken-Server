@@ -112,6 +112,16 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+### 4. Cap2Hash and HashCater scripts
+
+Clone the projects repositories.
+
+```bash
+git clone https://github.com/Bl4nsk1/Cap2Hash
+git clone https://github.com/Bl4nsk1/HashCater
+```
+Configure the variables of each script.
+
 ## Configuration
 
 Kraken-Server requires local paths to its upload directory, processing scripts, and Hashcat executable.
