@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="assets/kraken-logo.png">
+</p>
+
+<p align="center">
+  <b>Automated Wi-Fi Handshake Processing & Password Cracking</b><br>
+  Upload your PCAPs and let Kraken handle the rest.
+</p>
+
 # Kraken-Server-Server
 
 **Kraken-Server-Server** is a Flask-based web application for managing wireless capture files and automating their cracking through Cap2Hash and Hashcat.
