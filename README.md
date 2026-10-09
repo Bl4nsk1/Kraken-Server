@@ -7,9 +7,9 @@
   Upload your PCAPs and let Kraken handle the rest.
 </p>
 
-# Kraken-Server-Server
+# Kraken-Server
 
-**Kraken-Server-Server** is a Flask-based web application for managing wireless capture files and automating their cracking through Cap2Hash and Hashcat.
+**Kraken-Server** is a Flask-based web application for managing wireless capture files and automating their cracking through Cap2Hash and Hashcat.
 
 It provides a web interface for uploading capture files, monitoring processing jobs in real time, and reviewing execution logs and job history.
 
@@ -29,7 +29,7 @@ It provides a web interface for uploading capture files, monitoring processing j
 
 ## Architecture
 
-Kraken-Server-Server uses Flask to serve the web interface and coordinate background processing.
+Kraken-Server uses Flask to serve the web interface and coordinate background processing.
 
 ```text
 Browser
