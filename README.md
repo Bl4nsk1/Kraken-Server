@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="400" height="400" alt="kraken-logo" src="https://github.com/user-attachments/assets/bb4a7b65-b003-4c66-a6c9-05417b14c7ff" />
+  <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/c8d1ed4f-2b07-409c-ba60-21bf237deeed" />
 </p>
 
 <p align="center">
